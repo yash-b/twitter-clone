@@ -26,7 +26,7 @@ Install Technologies (Ubuntu)
 
 How to run project:
 --------------------  
-1) git clone ``` https://github.com/alfonsf1/microBlogging.git ```      
+1) git clone ``` https://github.com/yash-b/twitter-clone.git ```      
 2) To create the database   
    - Launch the terminal and type  
       ``` cd microBlogging ```  
