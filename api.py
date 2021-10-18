@@ -30,10 +30,10 @@ def createUser(
 ):
     users = hug_usersdb["users"]
     user = {
-        "username": hug.types.text,
-        "bio": hug.types.text,
-        "email": hug.types.text,
-        "password": hug.types.text,
+        "username": username,
+        "bio": bio,
+        "email": email,
+        "password": password,
     }
     try:
         users.insert(user)
