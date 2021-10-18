@@ -5,16 +5,20 @@ import hug
 
 
 @hug.cli()
-@hug.get(examples='userTimeline')
+@hug.get()
 @hug.local()
-
-# not sure what to put inside of the function 
 def user_timeline():
     return {"success":True}
 
+@hug.cli()
+@hug.get()
+@hug.local()
 def home_timeline():
     return {"success":True}
 
+@hug.cli()
+@hug.get()
+@hug.local()
 def public_timeline():
     return {"success":True}
 
