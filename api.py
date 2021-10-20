@@ -93,7 +93,7 @@ def getUsers(hug_postsdb):
 
 # post - create
 @hug.post("/create/post")
-def getUsers(username: hug.types.text, post_text: hug.types.text, timestamp: hug.type.text, hug_postsdb):
+def getUsers(username: hug.types.text, post_text: hug.types.text, timestamp: hug.types.text, hug_postsdb):
     sql = 'INSERT INTO posts (username, post, timestamp) VALUES (?, ?, ?)'
     post = query(hug_postsdb, sql, [username, post_text, timestamp], one=True)
     if not post:
