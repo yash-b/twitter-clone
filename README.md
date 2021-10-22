@@ -55,7 +55,7 @@ Methods
 
 - Verify User  
    -  verifyUser functon takes in the arguemnets of a username and password and authenticate it with the database.  
-      - Exanple  
+      - Example  
       ``` $ http GET localhost:1936/verifyUser username="rye" password="rye"```  
 
 - Add Follower   
@@ -79,7 +79,7 @@ Methods
       ``` $ http -a rye:rye GET localhost:1936/home_timeline username="rye" ```    
 
 - Public Timeline  
-   - public_timeLine displays all the post in the database in reverse-chronological order.  
+   - public_timeline displays all the post in the database in reverse-chronological order.  
       - Example  
       ``` $ http GET localhost:1936/public_timeline ```    
 
