@@ -1,11 +1,11 @@
-Micro Blogging API
+Twitter clone API - backend
 ===============================
-This project contains two RESTful back-end microservices. Our microvlogging API offers services similar to twitter.  
+This project contains two RESTful back-end microservices that are production ready using Hug routing, HTTP access and Hug's authentication, sqlite3 embedded database, Web Service Gateway Interface, Gunicorn, Foreman, and HAProxy HTTP load balancer.
 
 Contributors of the group project:  
 ---------------------------------- 
-1) Yash Bhambhani - 893409748 
-2) Hanyue Zheng - 
+1) Yash Bhambhani
+2) Hanyue Zheng
 3) Sijan Rijal  
   
 Technologies      
@@ -13,75 +13,79 @@ Technologies
 1) Python  
 2) Hug  
 3) SQLite3  
-4) MySQL  
+4) SQL  
 5) Foreman  
 6) HTTPie  
+7) HAProxy
 
 Install Technologies (Ubuntu)  
 ===============================
-1) Foreman, httpie, sqlite3  
+1) Foreman, httpie, sqlite3
    ``` $ sudo apt install --yes python3-pip ruby-foreman httpie sqlite3  ```
-2) Bottle and SQLite plugin for hug  
-   ``` $ python3 -m pip install hug hug-sqlite ```  
+2) Hug and SQLite plugin for hug  
+   ``` $ python3 -m pip install hug sqlite-utils ```  
+3) HAProxy and Gunicorn servers
+   ``` $ sudo apt install --yes haproxy gunicorn```
 
 How to run project:
 --------------------  
 1) git clone ``` https://github.com/yash-b/twitter-clone.git ```      
-2) To create the database   
-   - Launch the terminal and type  
-      ``` cd microBlogging ```  
-      ``` $ sqlite3 timeline.db```  
-         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``` sqlite> .read timeline.sql```  
-         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``` sqlite> .exit ```  
-      ``` $ sqlite3 user.db```  
-         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``` sqlite> .read user.sql```  
-         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``` sqlite> .exit ```  
-3) To start the database    
+2) To initialize the database
+   - Launch the terminal and start the initializing file 
+      ``` cd twitter-clone ```  
+      ``` $ ./bin/init.sh```  
+3) To start the microservices    
    - In the terminal type:  
-      ``` $ formman start ```  
-4) Open a new terminal in the same directory and use the methods listed below;  
-  
-    
->localhost:5000 is connected to user.db  
-  
->localhost:5100 is connected timeline.db  
-  
-  
+      ``` $ foreman start -m users=1,timeline=3 -p 5000 ```  
+4) Open a new terminal in the same directory and use the methods listed below;
+
+Additional Files and Instructions
+----------------------------------
+- haproxy.cfg
+   - This file needs to temporarily replace ``` /etc/haproxy/haproxy.cfg ``` for the HAProxy load balancer to create a single front-end at port 1936 for four instances of our microservices.
+- Look at HAProxy load balancer's metrics and health of our microserver's instances.
+   - This can be done by visiting ``` localhost:1935 ``` with username = user and password = password as credentials to access the site. 
+
 Methods  
 --------------  
-- Crate User  
-   - createUser function crates a user that is tied to a username, password, and an email  
+- Sign up  
+   - Signup function creates a new user, which requires arguments for username, password, email, and bio.  
       - Example  
-      ``` $ http post localhost:5000/user username="Sergio" password="xyz789A12" email="Sergio@gmail.com" ```  
+      ``` $ http POST localhost:1936/signup/ username="ProfAvery" password="csufbackendclass" email="ProfAvery@gmail.com" ```  
 
-- Check Password  
-   -  checkPassword functon takes in the parameters of a username and password and check it with the data base.  
+- Verify User  
+   -  verifyUser functon takes in the arguemnets of a username and password and authenticate it with the database.  
       - Exanple  
-      ``` $ http get localhost:5000/user/Alfonso/adwO12312 ```  
+      ``` $ http GET localhost:1936/verifyUser username="rye" password="rye"```  
 
 - Add Follower   
-   - addFollower function takes in the parameter of the username account and the name of the user they wish to follow.  
+   - Follow function takes in the argument for yourUsername and followingUsername. This method cannot be called by an unauthorized user.  
       - Example  
-      ``` $ http post localhost:5000/user/follower/add username="Alfonso" follower="Rosendo" ```  
+      ``` $ http -a rye:rye POST localhost:1936/follow/ yourUsername="rye" followingUsername="thedeparted" ```  
 
-- Remove Follower
-   - removeFollower function takes in the parameter of the username account and the name of the user they want to unfollow  
+- Get followers
+   - get_following function takes in the argument of the username and displays everyone the user follows.  
       - Example  
-      ``` $ http DELETE localhost:5000/user/follower/remove username="Alfonso" follower="Rosendo" ```  
+      ``` $ http GET localhost:1936/get_following username="rye" ```  
+
 - User Timeline  
-   - userTimeline gets all of the posts of the signed in user  
+   - user_timeline gets all of the posts of the signed in user. This method cannot be called by an unauthorized user.
       - Example  
-      ``` $ http GET localhost:5100/timeline/<User> ```  
-
-- Public Timeline  
-   - publicTimeline displays of the users posts from the micro blogging service  
-      - Example  
-      ``` $ http GET localhost:5100/timeline/public ```    
+      ``` $ http -a rye:rye GET localhost:1936/user_timeline username="rye" ```  
 
 - Home Timeline  
-   - homeTimeLine displays the post of the followers of the user  
+   - home_timeline displays all of the users posts. This method cannot be called by an unauthorized user.  
       - Example  
-      ``` $ http GET localhost:5100/timeline/home/<User> ```    
+      ``` $ http -a rye:rye GET localhost:1936/home_timeline username="rye" ```    
 
-- Post Tweet  
-   - postTweet function allows users to post to the timeline
+- Public Timeline  
+   - public_timeLine displays all the post in the database in reverse-chronological order.  
+      - Example  
+      ``` $ http GET localhost:1936/public_timeline ```    
+
+- Create Post  
+   - create_post function allows users to post a tweet to their timeline. It requires the username, post_text, and an optional repost arguments. This method can also be used to repost an older post. This method cannot be called by an unauthorized user.
+      - Example (original post)
+      ``` $ http -a rye:rye POST localhost:1936/create_post username="rye" post_text="Watching Love Island is probably the worst use of your time."```
+      - Example (repost)
+      ``` http -a rye:rye POST localhost:1936/create_post username="rye" post_text="She thought there'd be sufficient time if she hid her watch." repost=6 ```
