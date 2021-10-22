@@ -43,7 +43,8 @@ Additional Files and Instructions
 ----------------------------------
 - haproxy.cfg
    - This file needs to temporarily replace ``` /etc/haproxy/haproxy.cfg ``` for the HAProxy load balancer to create a single front-end at port 1936 for four instances of our microservices.
-- Look at HAProxy load balancer's metrics and health of our microserver's instances.
+   - Run ``` sudo service haproxy restart ``` on command line to start haproxy service with new config file.
+- Look at HAProxy load balancer's metrics and health of our microservice's instances.
    - This can be done by visiting ``` localhost:1935 ``` with username = user and password = password as credentials to access the site. 
 
 Methods  

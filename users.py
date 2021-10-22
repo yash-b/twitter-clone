@@ -1,13 +1,9 @@
-import configparser
-import logging.config
+# CPSC 449 - Project 2
+# Twitter clone - backend
+# Contributers: Sijan Rijal, Hanyue Zheng, Yash Bhambhani
 
 import hug
 import sqlite_utils
-
-#Load configuration
-config = configparser.ConfigParser()
-config.read("./etc/api.ini")
-logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers= False)
 
 @hug.directive()
 def usersdb(section="sqlite", key="usersdb", **kwargs):
@@ -15,7 +11,7 @@ def usersdb(section="sqlite", key="usersdb", **kwargs):
     return sqlite_utils.Database(dbfile)
 
 @hug.authentication.basic
-@hug.get("/verifyUser")
+@hug.get("/verify/")
 def isUserInTheDatabase(username, password, hug_usersdb):
     db = usersdb()
     result = db.query("SELECT * FROM users WHERE username==\"{}\" AND password==\"{}\"".format(str(username), str(password)))
@@ -47,7 +43,7 @@ def createUser(
     return {"success": "true"}
 
 
-@hug.get("/get_following")
+@hug.get("/following/{username}")
 def getUserFollowing(username: hug.types.text, hug_usersdb):
     db = hug_usersdb
     result = db.query("SELECT following FROM follows WHERE username==\"{}\"".format(str(username)))
@@ -67,6 +63,16 @@ def followUser(response, yourUsername: hug.types.text, followingUsername: hug.ty
         followingdb.insert(user)
     except Exception as e:
         response.status = hug.falcon.HTTP_409
+        return {"success": "false", "error": str(e)}
+    return {"success":"true"}
+
+@hug.delete("/unfollow", status=hug.falcon.HTTP_200, requires=isUserInTheDatabase)
+def followUser(response, yourUsername: hug.types.text, unfollowUsername: hug.types.text, hug_usersdb):
+    followingdb = hug_usersdb["follows"]
+    try:
+        followingdb.delete((yourUsername, unfollowUsername))
+    except Exception as e:
+        response.status = hug.falcon.HTTP_204
         return {"success": "false", "error": str(e)}
     return {"success":"true"}
 

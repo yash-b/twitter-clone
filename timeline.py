@@ -1,16 +1,11 @@
-import configparser
-import logging.config
-from base64 import b64encode
+# CPSC 449 - Project 2
+# Twitter clone - backend
+# Contributers: Sijan Rijal, Hanyue Zheng, Yash Bhambhani
 
 import hug
 import sqlite_utils
 import requests
 import datetime
-
-#Load configuration
-config = configparser.ConfigParser()
-config.read("./etc/api.ini")
-logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers= False)
 
 @hug.directive()
 def postsdb(section="sqlite", key="postsdb", **kwargs):
@@ -19,16 +14,16 @@ def postsdb(section="sqlite", key="postsdb", **kwargs):
 
 @hug.authentication.basic
 def checkUserAuthorization(username, password):
-    r = requests.get("http://localhost:5000/verifyUser", data={"username":str(username),"password":str(password)})
+    r = requests.get("http://localhost:5000/verify/", data={"username":str(username),"password":str(password)})
     print(r.text)
     if "true" in r.text:
         return True
     else:
         return False
 
-@hug.get("/home_timeline", requires=checkUserAuthorization)
+@hug.get("/timeline/home", requires=checkUserAuthorization)
 def getHomeTimeline(username:hug.types.text, hug_postsdb):
-    r = requests.get("http://localhost:5000/get_following", data={"username":str(username)})
+    r = requests.get(f"http://localhost:5000/following/{username}")
     followingJSON = r.json()
     string = ""
     for following in followingJSON:
@@ -43,7 +38,7 @@ def getHomeTimeline(username:hug.types.text, hug_postsdb):
     return []
 
 
-@hug.get("/user_timeline", requires=checkUserAuthorization)
+@hug.get("/timeline/{username}", requires=checkUserAuthorization)
 def getUserTimeline(username: hug.types.text, hug_postsdb):
     db = hug_postsdb
     result = db.query("SELECT * FROM posts WHERE username==\"{}\" ORDER BY timestamp DESC".format(str(username)))
@@ -53,7 +48,7 @@ def getUserTimeline(username: hug.types.text, hug_postsdb):
         list.append(row)
     return list
 
-@hug.get("/public_timeline")
+@hug.get("/timeline/public/")
 def getPublicTimeline(hug_postsdb):
     result = hug_postsdb.query("SELECT * FROM posts ORDER BY timestamp DESC")
     list = []
@@ -62,7 +57,7 @@ def getPublicTimeline(hug_postsdb):
     # print(hug_postsdb["posts"].last_rowid)
     return list
 
-@hug.post("/create_post", requires=checkUserAuthorization)
+@hug.post("/create/post", requires=checkUserAuthorization)
 def createPost(request, username: hug.types.text, post_text: hug.types.text, hug_postsdb, response, **kwargs):
     db = hug_postsdb["posts"]
     date = datetime.datetime.now()
