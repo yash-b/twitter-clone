@@ -19,7 +19,7 @@ def postsdb(section="sqlite", key="postsdb", **kwargs):
 
 @hug.authentication.basic
 def checkUserAuthorization(username, password):
-    r = requests.get("http://localhost:8001/verifyUser", data={"username":str(username),"password":str(password)})
+    r = requests.get("http://localhost:5000/verifyUser", data={"username":str(username),"password":str(password)})
     print(r.text)
     if "true" in r.text:
         return True
@@ -28,7 +28,7 @@ def checkUserAuthorization(username, password):
 
 @hug.get("/home_timeline", requires=checkUserAuthorization)
 def getHomeTimeline(username:hug.types.text, hug_postsdb):
-    r = requests.get("http://localhost:8001/get_following", data={"username":str(username)})
+    r = requests.get("http://localhost:5000/get_following", data={"username":str(username)})
     followingJSON = r.json()
     string = ""
     for following in followingJSON:
@@ -59,7 +59,7 @@ def getPublicTimeline(hug_postsdb):
     list = []
     for row in result:
         list.append(row)
-    print(hug_postsdb["posts"].last_rowid)
+    # print(hug_postsdb["posts"].last_rowid)
     return list
 
 @hug.post("/create_post", requires=checkUserAuthorization)
