@@ -5,6 +5,13 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT
 );
 
+CREATE TABLE follows (
+    username TEXT,
+    following TEXT,
+    FOREIGN KEY (username, following) REFERENCES users (username, username),
+    PRIMARY KEY (username, following)
+);
+
 INSERT INTO users (username, bio, email,password) VALUES("reindeer",
 "I think I will buy the red car",
 "reindeerblazarpiepie@gmail.com",
@@ -41,3 +48,22 @@ INSERT INTO users (username, bio, email,password) VALUES("kyanite",
 "kyanite"
 );
 
+INSERT INTO users (username, bio, email,password) VALUES("thedeparted",
+"All you need to do is pick up the pen and begin.",
+"thedeparted@gmail.com",
+"thedeparted"
+);
+
+INSERT INTO users (username, bio, email,password) VALUES("petrichor",
+"Nobody loves a pig wearing lipstick.",
+"petrichor@gmail.com",
+"petrichor"
+);
+
+INSERT INTO follows (username, following) VALUES ("kyanite", "lastrada");
+INSERT INTO follows (username, following) VALUES ("lastrada", "kyanite");
+INSERT INTO follows (username, following) VALUES ("lastrada", "thegreenmile");
+INSERT INTO follows (username, following) VALUES ("rye", "reindeer");
+INSERT INTO follows (username, following) VALUES ("thedeparted", "star-lord");
+INSERT INTO follows (username, following) VALUES ("reindeer", "star-lord");
+INSERT INTO follows (username, following) VALUES ("star-lord", "reindeer");
