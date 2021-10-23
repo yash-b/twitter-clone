@@ -2,10 +2,17 @@
 # Twitter clone - backend
 # Contributers: Sijan Rijal, Hanyue Zheng, Yash Bhambhani
 
+import configparser
+import logging.config
 import hug
 import sqlite_utils
 import requests
 import datetime
+
+#Load configuration
+config = configparser.ConfigParser()
+config.read("./etc/api.ini")
+logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers= False)
 
 @hug.directive()
 def postsdb(section="sqlite", key="postsdb", **kwargs):
@@ -44,7 +51,7 @@ def getUserTimeline(username: hug.types.text, hug_postsdb):
     result = db.query("SELECT * FROM posts WHERE username==\"{}\" ORDER BY timestamp DESC".format(str(username)))
     list = []
     for row in result:
-        print(row)
+        # print(row)
         list.append(row)
     return list
 

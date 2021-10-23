@@ -27,9 +27,18 @@ Install Technologies (Ubuntu)
 3) HAProxy and Gunicorn servers
    ``` $ sudo apt install --yes haproxy gunicorn```
 
+Additional Files and Instructions
+----------------------------------
+- haproxy.cfg
+   - This file needs to temporarily replace ``` /etc/haproxy/haproxy.cfg ``` for the HAProxy load balancer to create a single front-end at port 1936 for four instances of our microservices.
+   - Run ``` sudo service haproxy restart ``` on command line to start haproxy service with the new config file.
+- Look at HAProxy load balancer's metrics and health of our microserver's instances.
+   - This can be done by visiting ``` localhost:1935 ``` with username = user and password = password as credentials to access the site. 
+
 How to run project:
 --------------------  
-1) git clone ``` https://github.com/yash-b/twitter-clone.git ```      
+1) git clone ``` https://github.com/yash-b/twitter-clone.git ```
+   1.1) READ Additional Files and Instructions above!      
 2) To initialize the database
    - Launch the terminal and start the initializing file 
       ``` cd twitter-clone ```  
@@ -37,27 +46,19 @@ How to run project:
 3) To start the microservices    
    - In the terminal type:  
       ``` $ foreman start -m users=1,timeline=3 -p 5000 ```  
-4) Open a new terminal in the same directory and use the methods listed below;
-
-Additional Files and Instructions
-----------------------------------
-- haproxy.cfg
-   - This file needs to temporarily replace ``` /etc/haproxy/haproxy.cfg ``` for the HAProxy load balancer to create a single front-end at port 1936 for four instances of our microservices.
-   - Run ``` sudo service haproxy restart ``` on command line to start haproxy service with new config file.
-- Look at HAProxy load balancer's metrics and health of our microservice's instances.
-   - This can be done by visiting ``` localhost:1935 ``` with username = user and password = password as credentials to access the site. 
+4) Open a new terminal and test the twitter clone-backend using the methods listed below.
 
 Methods  
 --------------  
 - Sign up  
    - Signup function creates a new user, which requires arguments for username, password, email, and bio.  
       - Example  
-      ``` $ http POST localhost:1936/signup/ username="ProfAvery" password="csufbackendclass" email="ProfAvery@gmail.com" ```  
+      ``` $ http POST localhost:1936/signup/ username="ProfAvery" password="csufbackendclass" email="ProfAvery@gmail.com" bio="professor avery" ```  
 
 - Verify User  
    -  verifyUser functon takes in the arguemnets of a username and password and authenticate it with the database.  
       - Example  
-      ``` $ http GET localhost:1936/verifyUser username="rye" password="rye"```  
+      ``` $ http GET localhost:1936/verify username="rye" password="rye"```  
 
 - Add Follower   
    - Follow function takes in the argument for yourUsername and followingUsername. This method cannot be called by an unauthorized user.  
@@ -67,26 +68,28 @@ Methods
 - Get followers
    - get_following function takes in the argument of the username and displays everyone the user follows.  
       - Example  
-      ``` $ http GET localhost:1936/get_following username="rye" ```  
+      ``` $ http GET localhost:1936//following/rye username="rye" ```  
 
 - User Timeline  
    - user_timeline gets all of the posts of the signed in user. This method cannot be called by an unauthorized user.
       - Example  
-      ``` $ http -a rye:rye GET localhost:1936/user_timeline username="rye" ```  
+      ``` $ http -a rye:rye GET localhost:1936/timeline/use username="rye" ```  
 
 - Home Timeline  
    - home_timeline displays all of the users posts. This method cannot be called by an unauthorized user.  
       - Example  
-      ``` $ http -a rye:rye GET localhost:1936/home_timeline username="rye" ```    
+      ``` $ http -a rye:rye GET localhost:1936/timeline/home username="rye" ```    
 
 - Public Timeline  
    - public_timeline displays all the post in the database in reverse-chronological order.  
       - Example  
-      ``` $ http GET localhost:1936/public_timeline ```    
+      ``` $ http GET localhost:1936/timeline/public ```    
 
 - Create Post  
-   - create_post function allows users to post a tweet to their timeline. It requires the username, post_text, and an optional repost arguments. This method can also be used to repost an older post. This method cannot be called by an unauthorized user.
+   - create_post function allows users to post a tweet to their timeline. It requires the username, post_text, and an optional repost argument (post id of original post). This method can also be used to repost an older post. This method cannot be called by an unauthorized user.
       - Example (original post)
-      ``` $ http -a rye:rye POST localhost:1936/create_post username="rye" post_text="Watching Love Island is probably the worst use of your time."```
+      ``` $ http -a rye:rye POST localhost:1936/create/post username="rye" post_text="Ronaldo back at Man Utd? what is this, 2007?"```
       - Example (repost)
-      ``` http -a rye:rye POST localhost:1936/create_post username="rye" post_text="She thought there'd be sufficient time if she hid her watch." repost=6 ```
+      ``` http -a rye:rye POST localhost:1936/create/post username="rye" post_text="She thought there'd be sufficient time if she hid her watch." repost=6 ```
+      - Check new posts
+      ``` http -a rye:rye GET localhost:1936/timeline/use username="rye" ``` 

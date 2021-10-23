@@ -1,5 +1,3 @@
-PRAGMA foreign_keys = ON;
-
 CREATE TABLE IF NOT EXISTS users (
     username TEXT PRIMARY KEY,
     bio TEXT,

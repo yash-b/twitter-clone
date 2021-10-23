@@ -2,8 +2,15 @@
 # Twitter clone - backend
 # Contributers: Sijan Rijal, Hanyue Zheng, Yash Bhambhani
 
+import configparser
+import logging.config
 import hug
 import sqlite_utils
+
+#Load configuration
+config = configparser.ConfigParser()
+config.read("./etc/api.ini")
+logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers= False)
 
 @hug.directive()
 def usersdb(section="sqlite", key="usersdb", **kwargs):
@@ -76,6 +83,3 @@ def followUser(response, yourUsername: hug.types.text, unfollowUsername: hug.typ
         return {"success": "false", "error": str(e)}
     return {"success":"true"}
 
-
-
-# hug.API(__name__).http.serve(port=8001)
