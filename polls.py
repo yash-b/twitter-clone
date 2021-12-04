@@ -9,6 +9,10 @@ TABLE_NAME = "Polls"
 
 db = boto3.resource("dynamodb", endpoint_url="http://localhost:8000")
 
+@hug.startup()
+def onStart(api):
+    print(dir(api.http.urls))
+
 @hug.authentication.basic
 def checkUserAuthorization(username, password):
     r = requests.get("http://localhost:5000/verify/", data={"username":str(username),"password":str(password)})
