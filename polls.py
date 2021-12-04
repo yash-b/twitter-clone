@@ -11,7 +11,7 @@ db = boto3.resource("dynamodb", endpoint_url="http://localhost:8000")
 
 @hug.startup()
 def onStart(api):
-    print(dir(api.http.urls))
+    requests.post("http://localhost:5300/addservice", data={"servicename":"polls", "urls":"http://localhost:5200", "healthcheckPath":"/results/1"})
 
 @hug.authentication.basic
 def checkUserAuthorization(username, password):

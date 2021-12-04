@@ -14,6 +14,10 @@ config = configparser.ConfigParser()
 config.read("./etc/api.ini")
 logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers= False)
 
+@hug.startup()
+def onStart(api):
+    requests.post("http://localhost:5300/addservice", data={"servicename":"polls", "urls":"http://localhost:5100, http://localhost:5101, http://localhost:5102", "healthcheckPath":"/timeline/public"})
+
 @hug.directive()
 def postsdb(section="sqlite", key="postsdb", **kwargs):
     dbfile = config[section][key]
