@@ -3,6 +3,8 @@
 # Contributers: Sijan Rijal, Hanyue Zheng, Yash Bhambhani
 
 import configparser
+import greenstalk
+import json
 import logging.config
 import hug
 import sqlite_utils
@@ -16,7 +18,7 @@ logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers=
 
 @hug.startup()
 def onStart(api):
-    requests.post("http://localhost:5300/addservice", data={"servicename":"polls", "urls":"http://localhost:5100, http://localhost:5101, http://localhost:5102", "healthcheckPath":"/timeline/public"})
+    requests.post("http://localhost:5300/addservice", data={"servicename":"timeline", "urls":"http://localhost:5100, http://localhost:5101, http://localhost:5102", "healthcheckPath":"/timeline/public"})
 
 @hug.directive()
 def postsdb(section="sqlite", key="postsdb", **kwargs):
@@ -87,6 +89,31 @@ def createPost(request, username: hug.types.text, post_text: hug.types.text, hug
     except Exception as e:
         response.status = hug.falcon.HTTP_409
         return {"error":str(e)}
+    return {"status":"success"}
+
+@hug.post("/create/post_async", requires=checkUserAuthorization)
+def createPostAsync(request, username: hug.types.text, post_text: hug.types.text, response, **kwargs):
+    date = datetime.datetime.now()
+    timeStamp = str(date)[0:19]
+    post = {
+        "username": username,
+        "post": post_text,
+        "timestamp": timeStamp
+    }
+
+    try:
+        post["repost"] = "/posts/{}".format(kwargs["repost"])
+    except:
+        ""
+
+    try:
+        with greenstalk.Client(('127.0.0.1', 11300)) as client:
+            client.put(json.dumps(post))
+    except Exception as e:
+        response.status = hug.falcon.HTTP_409
+        return {"error":str(e)}
+
+    response.status = hug.falcon.HTTP_202
     return {"status":"success"}
 
 @hug.get("/posts/{id}")

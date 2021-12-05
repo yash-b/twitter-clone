@@ -1,0 +1,45 @@
+hey -m POST -H "Authorization: Basic cnllOnJ5ZQ==" -H "Content-Type: application/json" -d  '{"username":"rye","post_text":"Ronaldo back at Man Utd? what is this, 2007?"}' http://localhost:1936/create/post_async
+
+
+Summary:
+  Total:        0.3525 secs
+  Slowest:      0.1061 secs
+  Fastest:      0.0209 secs
+  Average:      0.0772 secs
+  Requests/sec: 567.4417
+
+  Total data:   4200 bytes
+  Size/request: 21 bytes
+
+Response time histogram:
+  0.021 [1]     |
+  0.029 [5]     |■■
+  0.038 [3]     |■
+  0.046 [5]     |■■
+  0.055 [4]     |■■
+  0.064 [5]     |■■
+  0.072 [5]     |■■
+  0.081 [72]    |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.089 [85]    |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.098 [8]     |■■■■
+  0.106 [7]     |■■■
+
+
+Latency distribution:
+  10% in 0.0568 secs
+  25% in 0.0764 secs
+  50% in 0.0806 secs
+  75% in 0.0842 secs
+  90% in 0.0880 secs
+  95% in 0.0917 secs
+  99% in 0.1055 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:   0.0029 secs, 0.0209 secs, 0.1061 secs
+  DNS-lookup:   0.0012 secs, 0.0000 secs, 0.0074 secs
+  req write:    0.0001 secs, 0.0000 secs, 0.0019 secs
+  resp wait:    0.0740 secs, 0.0091 secs, 0.0943 secs
+  resp read:    0.0001 secs, 0.0000 secs, 0.0025 secs
+
+Status code distribution:
+  [202] 200 responses

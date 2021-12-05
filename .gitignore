@@ -125,3 +125,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Mac thing
+.DS_STORE
+
+# var folder dbs and logs
+var/log
+var/shared-local-instance.db
+
