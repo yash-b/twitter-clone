@@ -93,3 +93,9 @@ Methods
       ``` http -a rye:rye POST localhost:1936/create/post username="rye" post_text="She thought there'd be sufficient time if she hid her watch." repost=6 ```
       - Check new posts
       ``` http -a rye:rye GET localhost:1936/timeline/use username="rye" ``` 
+
+- Service Registry
+   - Add a service (note, you have to send the request to the service directly, not haproxy)
+      - Example: ```http POST localhost:5300/addservice serviceName="polls" healthcheckPath="/results/1" urls="http://localhost:5200"```
+   - Get a service
+      - Example: ```http GET localhost:5300/service/polls```

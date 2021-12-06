@@ -34,7 +34,7 @@ def vote(response, pollId: hug.types.number, voteOption: hug.types.text, usernam
         hug_pollsdb.put_item(
             Item = {
                 "PK":"USER#{}".format(username),
-                "SK":"POLL#{}".format(pollId), # Why does the user choose the poll id?
+                "SK":"POLL#{}".format(pollId),
                 "Username":str(username),
                 "VoteOption":str(voteOption)
             },

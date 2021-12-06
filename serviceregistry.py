@@ -43,8 +43,8 @@ def onStart(api):
     serviceHealthCheckThread.start()
 
 @hug.post("/addservice")
-def addToServiceRegistry(serviceName: hug.types.text, urls: hug.types.delimited_list, healthcheckPath:hug.types.text):
-    doAddToServiceRegistry(serviceName, urls, healthCheckPath)
+def addToServiceRegistry(serviceName: hug.types.text, urls: hug.types.delimited_list(','), healthcheckPath:hug.types.text):
+    doAddToServiceRegistry(serviceName, urls, healthcheckPath)
 
 @hug.get("/service/{servicename}")
 def getServiceUrl(servicename: hug.types.text):

@@ -1,6 +1,5 @@
 # Installing dependencies:
 - Install XCode (includes python3 and more) through app store
-- Install Mac Ports https://www.macports.org/install.php
 - Download SQLLite https://www.sqlite.org/download.html . Unzip and place into your path.
 - Install gunicorn: pip install gunicorn
 - Install foreman: gem install foreman
@@ -8,7 +7,7 @@
 - Install httpie: brew install httpie
 - Install hub, sqlite python libs: python3 -m pip install hug sqlite-utils greenstalk boto3
 - Install haproxy: brew install haproxy
-- Install beanstalkd: sudo port install beanstalkd
+- Install beanstalkd: brew install beanstalkd
 - Install Java runtime, https://java.com/en/download/
 - Install AWS cli (right hand side of page), https://aws.amazon.com/cli/
 
