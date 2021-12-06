@@ -15,7 +15,7 @@ logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers=
 
 @hug.startup()
 def onStart(api):
-    requests.post("http://localhost:5300/addservice", data={"servicename":"users", "urls":"http://localhost:5400", "healthcheckPath":"/following/rye"})
+    requests.post("http://localhost:5300/addservice", data={"serviceName":"users", "urls":"http://localhost:5400", "healthcheckPath":"/following/rye"})
 
 @hug.directive()
 def usersdb(section="sqlite", key="usersdb", **kwargs):
