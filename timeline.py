@@ -27,7 +27,7 @@ def postsdb(section="sqlite", key="postsdb", **kwargs):
 
 @hug.authentication.basic
 def checkUserAuthorization(username, password):
-    r = requests.get("http://localhost:5000/verify/", data={"username":str(username),"password":str(password)})
+    r = requests.get("http://localhost:5400/verify/", data={"username":str(username),"password":str(password)})
     print(r.text)
     if "true" in r.text:
         return True
