@@ -101,6 +101,9 @@ Methods
    - `vote` allows users to vote on an existing poll by providing a vote option and a poll id.
       - Example
       ```http -a rye:rye POST localhost:1936/vote username="rye" voteOption="1" pollId="10"```
+   - `results/{pollID}` gives the results of the given poll id.
+      - Example
+      ```http GET localhost:1936/results/10```
 
 - Service Registry
    - Add a service (note, you have to send the request to the service directly, not haproxy)
