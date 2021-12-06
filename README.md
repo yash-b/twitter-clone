@@ -94,8 +94,18 @@ Methods
       - Check new posts
       ``` http -a rye:rye GET localhost:1936/timeline/use username="rye" ``` 
 
+- Polls
+   - create/poll allows users to create a poll question with poll options.
+      - Example
+      ```http -a rye:rye POST localhost:1936/create/poll username="rye" question="What's the right answer?" options="1,2,3,4" pollId="10"```
+   - `vote` allows users to vote on an existing poll by providing a vote option and a poll id.
+      - Example
+      ```http -a rye:rye POST localhost:1936/vote username="rye" voteOption="1" pollId="10"```
+
 - Service Registry
    - Add a service (note, you have to send the request to the service directly, not haproxy)
-      - Example: ```http POST localhost:5300/addservice serviceName="polls" healthcheckPath="/results/1" urls="http://localhost:5200"```
+      - Example
+      ```http POST localhost:5300/addservice serviceName="polls" healthcheckPath="/results/1" urls="http://localhost:5200"```
    - Get a service
-      - Example: ```http GET localhost:5300/service/polls```
+      - Example
+      ```http GET localhost:5300/service/polls```
