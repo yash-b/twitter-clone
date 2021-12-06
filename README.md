@@ -93,6 +93,9 @@ Methods
       ``` http -a rye:rye POST localhost:1936/create/post username="rye" post_text="She thought there'd be sufficient time if she hid her watch." repost=6 ```
       - Check new posts
       ``` http -a rye:rye GET localhost:1936/timeline/use username="rye" ``` 
+   - There is also an async version of the same api.
+      - Example
+      ```http -a rye:rye POST localhost:1936/create/post_async username="rye" post_text="Ronaldo back at Man Utd? what is this, 2007?"```
 
 - Polls
    - create/poll allows users to create a poll question with poll options.

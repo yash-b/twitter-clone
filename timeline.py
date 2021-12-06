@@ -70,9 +70,7 @@ def getPublicTimeline(hug_postsdb):
     # print(hug_postsdb["posts"].last_rowid)
     return list
 
-@hug.post("/create/post", requires=checkUserAuthorization)
-def createPost(request, username: hug.types.text, post_text: hug.types.text, hug_postsdb, response, **kwargs):
-    db = hug_postsdb["posts"]
+def createPostDict(username, post_text, kwargs):
     date = datetime.datetime.now()
     timeStamp = str(date)[0:19]
     post = {
@@ -84,6 +82,12 @@ def createPost(request, username: hug.types.text, post_text: hug.types.text, hug
         post["repost"] = "/posts/{}".format(kwargs["repost"])
     except:
         ""
+    return post
+
+@hug.post("/create/post", requires=checkUserAuthorization)
+def createPost(request, username: hug.types.text, post_text: hug.types.text, hug_postsdb, response, **kwargs):
+    db = hug_postsdb["posts"]
+    post = createPostDict(username, post_text, kwargs)
     try:
         db.insert(post)
     except Exception as e:
@@ -93,19 +97,9 @@ def createPost(request, username: hug.types.text, post_text: hug.types.text, hug
 
 @hug.post("/create/post_async", requires=checkUserAuthorization)
 def createPostAsync(request, username: hug.types.text, post_text: hug.types.text, response, **kwargs):
-    date = datetime.datetime.now()
-    timeStamp = str(date)[0:19]
-    post = {
-        "username": username,
-        "post": post_text,
-        "timestamp": timeStamp
-    }
-
-    try:
-        post["repost"] = "/posts/{}".format(kwargs["repost"])
-    except:
-        ""
-
+    post = createPostDict(username, post_text, kwargs)
+    # type is used to pick which process function to use in beanstalk_consumer.py
+    post["beanstalk_consumer_type"] = "post";
     try:
         with greenstalk.Client(('127.0.0.1', 11300)) as client:
             client.put(json.dumps(post))
