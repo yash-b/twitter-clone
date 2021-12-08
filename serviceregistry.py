@@ -8,10 +8,13 @@ serviceDict = {}
 
 def healthCheck():
     while True:
-        for key,value in serviceDict.items():
+        serviceDictCopy = None
+        with threading.Lock():
+            serviceDictCopy = serviceDict.copy()
+        for key,value in serviceDictCopy.items():
             if not "healthCheckPath" in key:
                 for urlString in value:
-                    healthCheckUrl = urlString + serviceDict[key+"healthCheckPath"]
+                    healthCheckUrl = urlString + serviceDictCopy[key+"healthCheckPath"]
                     response = requests.get(url = healthCheckUrl)
                     currentStatusCode = response.status_code
                     if currentStatusCode!=200:
