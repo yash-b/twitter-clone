@@ -65,7 +65,7 @@ def process_jobs():
                     elif job_type == "polls":
                         urlLink = job["url"]
                         pollId = urlLink.split("/")[2]
-                        checkIfPollIdIsValid()
+                        checkIfPollIdIsValid(pollId)
                     else:
                         print ("Unknown job type found: " + job_type)
                         client.delete(job_obj)
