@@ -10,6 +10,7 @@ import hug
 import sqlite_utils
 import requests
 import datetime
+import re
 
 #Load configuration
 config = configparser.ConfigParser()
@@ -99,10 +100,16 @@ def createPost(request, username: hug.types.text, post_text: hug.types.text, hug
 def createPostAsync(request, username: hug.types.text, post_text: hug.types.text, response, **kwargs):
     post = createPostDict(username, post_text, kwargs)
     # type is used to pick which process function to use in beanstalk_consumer.py
-    post["beanstalk_consumer_type"] = "post";
+    post["beanstalk_consumer_type"] = "post"
+    urlLink = getUrlFromPost(post_text)
+    pollLinkDict = {"url": urlLink}
+    linkType = isLinkForPollOrLike(urlLink)
     try:
         with greenstalk.Client(('127.0.0.1', 11300)) as client:
             client.put(json.dumps(post))
+            if linkType == "polls":
+                pollLinkDict["beanstalk_consumer_type"] = "polls"
+                client.put(json.dumps(pollLinkDict))
     except Exception as e:
         response.status = hug.falcon.HTTP_409
         return {"error":str(e)}
@@ -119,3 +126,21 @@ def getPost(response, id: hug.types.number, hug_postsdb):
     except sqlite_utils.db.NotFoundError:
         response.status = hug.falcon.HTTP_404
     return {"post": posts}
+
+def isLinkForPollOrLike(postText):
+    if len(postText) > 0:
+        urlString = urlLink[0]
+        #check if it's the link to a poll service
+        if "/results" in urlString:
+            return "polls"
+        else:
+            return "likes"
+    else:
+        return ""
+
+def getUrlFromPost(postText: str):
+        urlLink = re.findAll(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", postText)
+        if len(urlLink) > 0:
+            return urlLink[0]
+        else:
+            return ""

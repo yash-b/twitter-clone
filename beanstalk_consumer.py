@@ -5,10 +5,16 @@ import logging.config
 import sqlite_utils
 import time
 import traceback
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+from polls import pollsdb
 
 config = configparser.ConfigParser()
 config.read("./etc/api.ini")
 logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers= False)
+
+localdynamodb = boto3.resource("dynamodb", endpoint_url="http://localhost:8000")
+DYNAMODB_TABLE_NAME = "Polls"
 
 def createPost(post_info, db):
     try:
@@ -24,6 +30,18 @@ def handle_post(job):
     dbfile = config["sqlite"]["postsdb"]
     db = sqlite_utils.Database(dbfile)
     return createPost(job, db)
+
+# Returns true if the given poll id exists
+def checkIfPollIdIsValid(pollId):
+    pollsdb = localdynamodb.Table(DYNAMODB_TABLE_NAME)
+    dbresponse = pollsdb.query(
+        IndexName="QueryIndex",
+        KeyConditionExpression=Key("SK").eq("POLL#{}".format(pollId)) & Key("PK").begins_with("AUTHOR#")
+    )
+    if dbresponse["Count"] > 0:
+        return True
+    else:
+        return False
 
 def process_jobs():
     print ("Starting beanstalk consumer")
@@ -44,6 +62,10 @@ def process_jobs():
                     res = False
                     if job_type == "post":
                         res = handle_post(job)
+                    elif job_type == "polls":
+                        urlLink = job["url"]
+                        pollId = urlLink.split("/")[2]
+                        checkIfPollIdIsValid()
                     else:
                         print ("Unknown job type found: " + job_type)
                         client.delete(job_obj)
