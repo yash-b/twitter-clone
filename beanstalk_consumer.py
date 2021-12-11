@@ -7,7 +7,6 @@ import time
 import traceback
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
-from polls import pollsdb
 
 config = configparser.ConfigParser()
 config.read("./etc/api.ini")
@@ -43,40 +42,43 @@ def checkIfPollIdIsValid(pollId):
     else:
         return False
 
+def notifyUser(useremail: str):
+    try:
+        with greenstalk.Client(('127.0.0.1', 11400)) as client:
+            messageDict = {"sender":"noreply-project4@gmail.com", "receiver":useremail, "message":"Invalid poll id"}
+            client.put(json.dumps(messageDict))
+    except Exception as e:
+        print("Error notifying user")
+
 def process_jobs():
     print ("Starting beanstalk consumer")
-    while (True):
-        # Wrap the client getter in a try/catch so that in the case
-        # of exceptions we can recreate the client and continue working.
-        try:
-            # sleep in case of being stuck in an error loop.
-            time.sleep(1)
-            with greenstalk.Client(('127.0.0.1', 11300)) as client:
-                while True:
-                    job_obj = client.reserve() # blocks indefinitely and waits for a job
-                    
-                    job = json.loads(job_obj.body)
-                    job_type = job["beanstalk_consumer_type"]
-                    del job["beanstalk_consumer_type"]
-
-                    res = False
-                    if job_type == "post":
-                        res = handle_post(job)
-                    elif job_type == "polls":
-                        urlLink = job["url"]
-                        pollId = urlLink.split("/")[2]
-                        checkIfPollIdIsValid(pollId)
-                    else:
-                        print ("Unknown job type found: " + job_type)
-                        client.delete(job_obj)
-                    if res:
-                        print ("Completed job type: " + job_type)
-                        client.delete(job_obj)
-            
-        except Exception as e:
-            print ("beanstalk consumer saw an exception:")
-            print (e)
-            print(traceback.format_exc())
+    with greenstalk.Client(('127.0.0.1', 11300)) as client:
+        while True:
+            job_obj = client.reserve() # blocks indefinitely and waits for a job
+            try:
+                job = json.loads(job_obj.body)
+                job_type = job["beanstalk_consumer_type"]
+                del job["beanstalk_consumer_type"]
+                res = False
+                if job_type == "post":
+                    res = handle_post(job)
+                elif job_type == "polls":
+                    urlLink = job["url"]
+                    pollId = urlLink.split("/")[2]
+                    res = checkIfPollIdIsValid(pollId)
+                    if not res:
+                        notifyUser(job["useremail"])
+                else:
+                    print ("Unknown job type found: " + job_type)
+                    client.delete(job_obj)
+                if res:
+                    print ("Completed job type: " + job_type)
+                    client.delete(job_obj)
+            except Exception as e:
+                client.delete(job_obj)
+                print ("beanstalk consumer saw an exception:")
+                print (e)
+                print(traceback.format_exc())
 
 
 if __name__ == '__main__':

@@ -17,6 +17,23 @@ config = configparser.ConfigParser()
 config.read("./etc/api.ini")
 logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers= False)
 
+def isLinkForPollOrLike(urlString):
+    if len(urlString) > 0:
+        #check if it's the link to a poll service
+        if "/results" in urlString:
+            return "polls"
+        else:
+            return "likes"
+    else:
+        return ""
+
+def getUrlFromPost(postText: str):
+    urlLink = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", postText)
+    if len(urlLink) > 0:
+        return urlLink[0]
+    else:
+        return ""
+
 @hug.startup()
 def onStart(api):
     requests.post("http://localhost:5300/addservice", data={"serviceName":"timeline", "urls":"http://localhost:5100,http://localhost:5101,http://localhost:5102", "healthcheckPath":"/timeline/public"})
@@ -96,19 +113,18 @@ def createPost(request, username: hug.types.text, post_text: hug.types.text, hug
         return {"error":str(e)}
     return {"status":"success"}
 
-@hug.post("/create/post_async", requires=checkUserAuthorization)
-def createPostAsync(request, username: hug.types.text, post_text: hug.types.text, response, **kwargs):
+@hug.post("/create/post_async")
+def createPostAsync(request, username: hug.types.text, useremail: hug.types.text, post_text: hug.types.text, response, **kwargs):
     post = createPostDict(username, post_text, kwargs)
     # type is used to pick which process function to use in beanstalk_consumer.py
     post["beanstalk_consumer_type"] = "post"
     urlLink = getUrlFromPost(post_text)
-    pollLinkDict = {"url": urlLink}
     linkType = isLinkForPollOrLike(urlLink)
     try:
         with greenstalk.Client(('127.0.0.1', 11300)) as client:
             client.put(json.dumps(post))
             if linkType == "polls":
-                pollLinkDict["beanstalk_consumer_type"] = "polls"
+                pollLinkDict = {"url": urlLink, "beanstalk_consumer_type":"polls", "useremail": useremail}
                 client.put(json.dumps(pollLinkDict))
     except Exception as e:
         response.status = hug.falcon.HTTP_409
@@ -126,21 +142,3 @@ def getPost(response, id: hug.types.number, hug_postsdb):
     except sqlite_utils.db.NotFoundError:
         response.status = hug.falcon.HTTP_404
     return {"post": posts}
-
-def isLinkForPollOrLike(postText):
-    if len(postText) > 0:
-        urlString = urlLink[0]
-        #check if it's the link to a poll service
-        if "/results" in urlString:
-            return "polls"
-        else:
-            return "likes"
-    else:
-        return ""
-
-def getUrlFromPost(postText: str):
-        urlLink = re.findAll(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", postText)
-        if len(urlLink) > 0:
-            return urlLink[0]
-        else:
-            return ""
