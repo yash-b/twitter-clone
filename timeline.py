@@ -7,10 +7,13 @@ import greenstalk
 import json
 import logging.config
 import hug
+import smtplib
 import sqlite_utils
 import requests
 import datetime
 import re
+
+from utils import checkIfPollIdIsValid
 
 #Load configuration
 config = configparser.ConfigParser()
@@ -103,11 +106,26 @@ def createPostDict(username, post_text, kwargs):
     return post
 
 @hug.post("/create/post", requires=checkUserAuthorization)
-def createPost(request, username: hug.types.text, post_text: hug.types.text, hug_postsdb, response, **kwargs):
+def createPost(request, username: hug.types.text, useremail: hug.types.text, post_text: hug.types.text, hug_postsdb, response, **kwargs):
     db = hug_postsdb["posts"]
     post = createPostDict(username, post_text, kwargs)
+    urlLink = getUrlFromPost(post_text)
+    linkType = isLinkForPollOrLike(urlLink)
     try:
         db.insert(post)
+        # Now do everything sync here without beanstalk.
+        # Check if there is a poll, check if it exists, if not send email
+        if linkType == "polls":
+            pollId = urlLink.split("/")[4]
+            if not checkIfPollIdIsValid(pollId):
+                message = "Invalid poll id"
+                senderEmail = "noreply-project4@gmail.com"
+                msg = ("From: %s\r\nTo: %s\r\n\r\n"% (senderEmail, useremail)) + message
+                server = smtplib.SMTP("localhost", 1026)
+                server.set_debuglevel(1)
+                server.sendmail(senderEmail, useremail, msg)
+                server.quit()
+
     except Exception as e:
         response.status = hug.falcon.HTTP_409
         return {"error":str(e)}

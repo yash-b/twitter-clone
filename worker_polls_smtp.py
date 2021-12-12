@@ -4,6 +4,8 @@ import json
 import traceback
 import smtplib
 
+# These services mentioned below are automatically started by Foreman.
+
 #Need to configure beanstalk for the address
 #Use the command: beanstalkd -l 127.0.0.1 -p 11400
 

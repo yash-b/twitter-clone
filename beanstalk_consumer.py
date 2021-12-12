@@ -7,6 +7,7 @@ import time
 import traceback
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
+from utils import checkIfPollIdIsValid
 
 config = configparser.ConfigParser()
 config.read("./etc/api.ini")
@@ -24,20 +25,10 @@ def createPost(post_info, db):
         return False
     return True
 
-# Should return True if job is complete and should be deleted from beanstalk queue.
 def handle_post(job):
     dbfile = config["sqlite"]["postsdb"]
     db = sqlite_utils.Database(dbfile)
     return createPost(job, db)
-
-# Returns true if the given poll id exists
-def checkIfPollIdIsValid(pollId):
-    pollsdb = localdynamodb.Table(DYNAMODB_TABLE_NAME)
-    dbresponse = pollsdb.query(
-        IndexName="QueryIndex",
-        KeyConditionExpression=Key("SK").eq("POLL#{}".format(str(pollId))) & Key("PK").begins_with("AUTHOR#")
-    )
-    return dbresponse["Count"] > 0
 
 def notifyUser(useremail: str):
     print("Notifying...")
@@ -59,18 +50,19 @@ def process_jobs():
                     job = json.loads(job_obj.body)
                     job_type = job["beanstalk_consumer_type"]
                     del job["beanstalk_consumer_type"]
-                    res = False
                     if job_type == "post":
-                        res = handle_post(job)
+                        handle_post(job)
                     elif job_type == "polls":
                         urlLink = job["url"]
                         pollId = urlLink.split("/")[4]
-                        res = checkIfPollIdIsValid(pollId)
-                        if not res:
+                        pollValid = checkIfPollIdIsValid(pollId)
+                        if not pollValid:
                             notifyUser(job["useremail"])
                     else:
                         print ("Unknown job type found: " + job_type)
-                    print ("Completed job type: " + job_type)
+
+                    print ("Done with job type: " + job_type)
+                    # Let's just complete the job always, the alternative is to do a max # of retries
                     client.delete(job_obj)
                 except Exception as e:
                     client.delete(job_obj)

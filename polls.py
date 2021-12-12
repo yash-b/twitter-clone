@@ -41,7 +41,7 @@ def vote(response, pollId: hug.types.number, voteOption: hug.types.text, usernam
             ConditionExpression="attribute_not_exists(PK) AND attribute_not_exists(SK)"
         )
     except Exception as e:
-        response.status = hug.falcon.HTTP_204
+        response.status = hug.falcon.HTTP_200
         return {"success":"false", "message":"You have already voted in the poll"}
     dbresponse = None
     try:
@@ -53,6 +53,7 @@ def vote(response, pollId: hug.types.number, voteOption: hug.types.text, usernam
         )
     except Exception as e:
         pass
+        
     try:
         if len(dbresponse)==0 or dbresponse==None or not "Item" in dbresponse:
             hug_pollsdb.put_item(
@@ -81,6 +82,7 @@ def vote(response, pollId: hug.types.number, voteOption: hug.types.text, usernam
             response.status = hug.falcon.HTTP_201
             return {"success": "true"}
     except Exception as e:
+        print(e)
         response.status = hug.falcon.HTTP_204
         return {"success":"false"}
 

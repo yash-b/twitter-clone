@@ -88,14 +88,14 @@ Methods
 - Create Post  
    - create_post function allows users to post a tweet to their timeline. It requires the username, post_text, and an optional repost argument (post id of original post). This method can also be used to repost an older post. This method cannot be called by an unauthorized user.
       - Example (original post)
-      ``` $ http -a rye:rye POST localhost:1936/create/post username="rye" post_text="Ronaldo back at Man Utd? what is this, 2007?"```
+      ``` $ http -a rye:rye POST localhost:1936/create/post username="rye" useremail="godame3434@ningame.com" post_text="Ronaldo back at Man Utd? what is this, 2007?"```
       - Example (repost)
-      ``` http -a rye:rye POST localhost:1936/create/post username="rye" post_text="She thought there'd be sufficient time if she hid her watch." repost=6 ```
+      ``` http -a rye:rye POST localhost:1936/create/post username="rye" useremail="godame3434@ningame.com" post_text="She thought there'd be sufficient time if she hid her watch." repost=6 ```
       - Check new posts
       ``` http -a rye:rye GET localhost:1936/timeline/use username="rye" ``` 
    - There is also an async version of the same api.
       - Example
-      ```http -a rye:rye POST localhost:1936/create/post_async username="rye" post_text="Ronaldo back at Man Utd? what is this, 2007?"```
+      ```http -a rye:rye POST localhost:1936/create/post_async username="rye" useremail="godame3434@ningame.com" post_text="Ronaldo back at Man Utd? what is this, 2007?"```
 
 - Polls
    - create/poll allows users to create a poll question with poll options.

@@ -6,5 +6,7 @@ dynamo_local: java -Djava.library.path=bin/dynamodb_local_latest/DynamoDBLocal_l
 beanstalkd: beanstalkd
 beanstalkd_polls: beanstalkd -l 127.0.0.1 -p 11400
 beanstalk_consumer: python3 beanstalk_consumer.py
+mailserver: python -m smtpd -n -c DebuggingServer localhost:1026
 worker_polls_smtp: python3 worker_polls_smtp.py
-# Use this command to run foreman: foreman start -m beanstalkd=1,beanstalkd_polls=1,beanstalk_consumer=1,worker_polls_smtp=1,dynamo_local=1,timeline=3,polls=1,serviceregistry=1,users=1 -p 5100
+# Use this command to run foreman: 
+# foreman start -m mailserver=1,beanstalkd=1,beanstalkd_polls=1,beanstalk_consumer=1,worker_polls_smtp=1,dynamo_local=1,timeline=3,polls=1,serviceregistry=1,users=1 -p 5100
