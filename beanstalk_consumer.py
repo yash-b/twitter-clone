@@ -35,14 +35,12 @@ def checkIfPollIdIsValid(pollId):
     pollsdb = localdynamodb.Table(DYNAMODB_TABLE_NAME)
     dbresponse = pollsdb.query(
         IndexName="QueryIndex",
-        KeyConditionExpression=Key("SK").eq("POLL#{}".format(pollId)) & Key("PK").begins_with("AUTHOR#")
+        KeyConditionExpression=Key("SK").eq("POLL#{}".format(str(pollId))) & Key("PK").begins_with("AUTHOR#")
     )
-    if dbresponse["Count"] > 0:
-        return True
-    else:
-        return False
+    return dbresponse["Count"] > 0
 
 def notifyUser(useremail: str):
+    print("Notifying...")
     try:
         with greenstalk.Client(('127.0.0.1', 11400)) as client:
             messageDict = {"sender":"noreply-project4@gmail.com", "receiver":useremail, "message":"Invalid poll id"}
@@ -52,33 +50,33 @@ def notifyUser(useremail: str):
 
 def process_jobs():
     print ("Starting beanstalk consumer")
-    with greenstalk.Client(('127.0.0.1', 11300)) as client:
-        while True:
-            job_obj = client.reserve() # blocks indefinitely and waits for a job
-            try:
-                job = json.loads(job_obj.body)
-                job_type = job["beanstalk_consumer_type"]
-                del job["beanstalk_consumer_type"]
-                res = False
-                if job_type == "post":
-                    res = handle_post(job)
-                elif job_type == "polls":
-                    urlLink = job["url"]
-                    pollId = urlLink.split("/")[2]
-                    res = checkIfPollIdIsValid(pollId)
-                    if not res:
-                        notifyUser(job["useremail"])
-                else:
-                    print ("Unknown job type found: " + job_type)
-                    client.delete(job_obj)
-                if res:
+    while True:
+        time.sleep(1)
+        with greenstalk.Client(('127.0.0.1', 11300)) as client:
+            while True:
+                job_obj = client.reserve() # blocks indefinitely and waits for a job
+                try:
+                    job = json.loads(job_obj.body)
+                    job_type = job["beanstalk_consumer_type"]
+                    del job["beanstalk_consumer_type"]
+                    res = False
+                    if job_type == "post":
+                        res = handle_post(job)
+                    elif job_type == "polls":
+                        urlLink = job["url"]
+                        pollId = urlLink.split("/")[4]
+                        res = checkIfPollIdIsValid(pollId)
+                        if not res:
+                            notifyUser(job["useremail"])
+                    else:
+                        print ("Unknown job type found: " + job_type)
                     print ("Completed job type: " + job_type)
                     client.delete(job_obj)
-            except Exception as e:
-                client.delete(job_obj)
-                print ("beanstalk consumer saw an exception:")
-                print (e)
-                print(traceback.format_exc())
+                except Exception as e:
+                    client.delete(job_obj)
+                    print ("beanstalk consumer saw an exception:")
+                    print (e)
+                    print(traceback.format_exc())
 
 
 if __name__ == '__main__':
