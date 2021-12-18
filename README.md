@@ -46,7 +46,8 @@ How to run project:
 2) To initialize the database
    - Launch the terminal and start the initializing file 
       ``` cd twitter-clone ```  
-      ``` $ ./bin/init.sh```  
+      ``` $ ./bin/init.sh``` 
+      ``` $ ./initawsdb.sh``` 
 3) To start the microservices    
    - In the terminal type:  
       ``` $ foreman start -m users=1,timeline=3,likes=1 -p 5000 ```  
@@ -54,68 +55,19 @@ How to run project:
 
 Methods  
 --------------  
-- Like post  
-   - Like function lets user like a post, it takes username and postid argument.  http POST localhost:1936/likeasync username=rye postid=1
-      - Example  
-      ``` $ http POST localhost:1936/likeasync username="rye" postid=1 ```  
+Methods  
+-------------- 
+- Likes
+To create a like for a post asynchronously, we use the the endpoint /likeasync and give a username and password
 
-- Verify User  
-   -  verifyUser functon takes in the arguemnets of a username and password and authenticate it with the database.  
-      - Example  
-      ``` $ http GET localhost:1936/verify username="rye" password="rye"```  
+Example: http POST localhost:1936/likeasync username="rye" postid="1"
 
-- Add Follower   
-   - Follow function takes in the argument for yourUsername and followingUsername. This method cannot be called by an unauthorized user.  
-      - Example  
-      ``` $ http -a rye:rye POST localhost:1936/follow/ yourUsername="rye" followingUsername="thedeparted" ```  
+This would like the post if the post id is found in the database else it would send a notification using a worker.
 
-- Get followers
-   - get_following function takes in the argument of the username and displays everyone the user follows.  
-      - Example  
-      ``` $ http GET localhost:1936//following/rye username="rye" ```  
+- Posts
+To create a post that contains link to polls, we use the endpoint /create/post_async like mentioned below:
 
-- User Timeline  
-   - user_timeline gets all of the posts of the signed in user. This method cannot be called by an unauthorized user.
-      - Example  
-      ``` $ http -a rye:rye GET localhost:1936/timeline/use username="rye" ```  
+Example: http POST localhost:1936/create/post_async username="rye", useremail="rye@gmail.com" post_text="Hello, world http://localhost:1936/results/1"
 
-- Home Timeline  
-   - home_timeline displays all of the users posts. This method cannot be called by an unauthorized user.  
-      - Example  
-      ``` $ http -a rye:rye GET localhost:1936/timeline/home username="rye" ```    
-
-- Public Timeline  
-   - public_timeline displays all the post in the database in reverse-chronological order.  
-      - Example  
-      ``` $ http GET localhost:1936/timeline/public ```    
-
-- Create Post  
-   - create_post function allows users to post a tweet to their timeline. It requires the username, post_text, and an optional repost argument (post id of original post). This method can also be used to repost an older post. This method cannot be called by an unauthorized user.
-      - Example (original post)
-      ``` $ http -a rye:rye POST localhost:1936/create/post username="rye" useremail="godame3434@ningame.com" post_text="Ronaldo back at Man Utd? what is this, 2007?"```
-      - Example (repost)
-      ``` http -a rye:rye POST localhost:1936/create/post username="rye" useremail="godame3434@ningame.com" post_text="She thought there'd be sufficient time if she hid her watch." repost=6 ```
-      - Check new posts
-      ``` http -a rye:rye GET localhost:1936/timeline/use username="rye" ``` 
-   - There is also an async version of the same api.
-      - Example
-      ```http -a rye:rye POST localhost:1936/create/post_async username="rye" useremail="godame3434@ningame.com" post_text="Ronaldo back at Man Utd? what is this, 2007?"```
-
-- Polls
-   - create/poll allows users to create a poll question with poll options.
-      - Example
-      ```http -a rye:rye POST localhost:1936/create/poll username="rye" question="What's the right answer?" options="1,2,3,4" pollId="10"```
-   - `vote` allows users to vote on an existing poll by providing a vote option and a poll id.
-      - Example
-      ```http -a rye:rye POST localhost:1936/vote username="rye" voteOption="1" pollId="10"```
-   - `results/{pollID}` gives the results of the given poll id.
-      - Example
-      ```http GET localhost:1936/results/10```
-
-- Service Registry
-   - Add a service (note, you have to send the request to the service directly, not haproxy)
-      - Example
-      ```http POST localhost:5300/addservice serviceName="polls" healthcheckPath="/results/1" urls="http://localhost:5200"```
-   - Get a service
-      - Example
-      ```http GET localhost:5300/service/polls```
+**Performance**
+All the performance difference using synchronous and asynchronous documentation can be found under hey_performance_notes folder
