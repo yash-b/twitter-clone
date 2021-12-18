@@ -1,4 +1,4 @@
-
+import greenstalk
 import configparser
 import logging.config
 from typing import NamedTuple
@@ -41,6 +41,19 @@ def likepost(response, username, postid):
         r.zadd("postlikes", {postid: rank} )
 
     return {"message": "Post liked successfully"}
+
+#Liking a post async
+@hug.post("/likeasync", status=hug.falcon.HTTP_202)
+def likePostAsync(response, username, postid):
+    try:
+        with greenstalk.Client(("127.0.0.1", 11300)) as client:
+            likesDict = {"username":str(username), "postid": str(postid), "beanstalk_consumer_type":"likes"}
+            client.put(json.dumps(likesDict))
+    except Exception as e:
+            response.status = hug.falcon.HHTP_409
+            return {"error":str(e)}
+    response.status = hug.falcon.HTTP_202
+
 
 #Get posts liked by a user
 @hug.get("/likes/{username}") 

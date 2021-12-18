@@ -8,6 +8,7 @@ import traceback
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from utils import checkIfPollIdIsValid
+import requests
 
 config = configparser.ConfigParser()
 config.read("./etc/api.ini")
@@ -39,6 +40,15 @@ def notifyUser(useremail: str):
     except Exception as e:
         print("Error notifying user")
 
+def notifyLikesUser(username: str):
+    print("Notifying...")
+    try:
+        with greenstalk.Client(('127.0.0.1', 11400)) as client:
+            messageDict = {"sender":"noreply-project4@gmail.com", "receiver":username, "message":"Invalid post id"}
+            client.put(json.dumps(messageDict))
+    except Exception as e:
+        print("Error notifying user")
+
 def process_jobs():
     print ("Starting beanstalk consumer")
     while True:
@@ -58,6 +68,14 @@ def process_jobs():
                         pollValid = checkIfPollIdIsValid(pollId)
                         if not pollValid:
                             notifyUser(job["useremail"])
+                    elif job_type == "likes":
+                        postId = job["postid"]
+                        username = job["username"]
+                        postResponse = requests.get("/posts/{}".format(postId))
+                        if postResponse.status_code == 404:
+                            notifyLikesUser(username)
+                        else:
+                            requests.post("/like", {"username": username, "postid":postId})
                     else:
                         print ("Unknown job type found: " + job_type)
 
