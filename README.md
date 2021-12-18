@@ -12,18 +12,22 @@ Technologies
 ===============================
 1) Python  
 2) Hug  
-3) SQLite3  
-4) SQL  
+3) Beanstsalk
+4) Greenstalk
 5) Foreman  
 6) HTTPie  
 7) HAProxy
+8) hey
+9) Redis and redis-py
+10) DynamoDB
+11) Boto3
 
 Install Technologies (Ubuntu)  
 ===============================
-1) Foreman, httpie, sqlite3
-   ``` $ sudo apt install --yes python3-pip ruby-foreman httpie sqlite3  ```
-2) Hug and SQLite plugin for hug  
-   ``` $ python3 -m pip install hug sqlite-utils ```  
+1) Foreman, httpie, beanstalkd, yes, redis, redis-py
+   ``` $ sudo apt install --yes python3-pip ruby-foreman httpie beanstalkd hey redis python3-hiredis awscli python3-boto3```
+2) Hug and greenstalk  
+   ``` $ python3 -m pip install hug greenstalk ```  
 3) HAProxy and Gunicorn servers
    ``` $ sudo apt install --yes haproxy gunicorn```
 
@@ -45,15 +49,15 @@ How to run project:
       ``` $ ./bin/init.sh```  
 3) To start the microservices    
    - In the terminal type:  
-      ``` $ foreman start -m users=1,timeline=3 -p 5000 ```  
+      ``` $ foreman start -m users=1,timeline=3,likes=1 -p 5000 ```  
 4) Open a new terminal and test the twitter clone-backend using the methods listed below.
 
 Methods  
 --------------  
-- Sign up  
-   - Signup function creates a new user, which requires arguments for username, password, email, and bio.  
+- Like post  
+   - Like function lets user like a post, it takes username and postid argument.  http POST localhost:1936/likeasync username=rye postid=1
       - Example  
-      ``` $ http POST localhost:1936/signup/ username="ProfAvery" password="csufbackendclass" email="ProfAvery@gmail.com" bio="professor avery" ```  
+      ``` $ http POST localhost:1936/likeasync username="rye" postid=1 ```  
 
 - Verify User  
    -  verifyUser functon takes in the arguemnets of a username and password and authenticate it with the database.  
