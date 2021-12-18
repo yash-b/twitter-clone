@@ -5,11 +5,12 @@
 - Install foreman: gem install foreman
 - Install brew: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 - Install httpie: brew install httpie
-- Install hub, sqlite python libs: python3 -m pip install hug sqlite-utils greenstalk boto3
+- Install hub, sqlite python libs: python3 -m pip install hug sqlite-utils greenstalk boto3 redis
 - Install haproxy: brew install haproxy
 - Install beanstalkd: brew install beanstalkd
 - Install Java runtime, https://java.com/en/download/
 - Install AWS cli (right hand side of page), https://aws.amazon.com/cli/
+- Install Redis: brew install redis  (to start redis server: brew services start redis)
 
 # Initializing the project (do 1 time)
 - Run this to initialize sqlite tables: ./bin/init.sh
