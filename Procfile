@@ -2,7 +2,7 @@ timeline: gunicorn timeline:__hug_wsgi__ --bind=localhost:$PORT
 polls: gunicorn polls:__hug_wsgi__ --bind=localhost:$PORT
 serviceregistry: gunicorn serviceregistry:__hug_wsgi__ --bind=localhost:$PORT
 users: gunicorn users:__hug_wsgi__ --bind=localhost:$PORT
-likes: gunicorn likes:__hugs_wsgi__ --bind=locahost:$PORT
+likes: gunicorn likes:__hug_wsgi__ --bind=localhost:$PORT
 dynamo_local: java -Djava.library.path=bin/dynamodb_local_latest/DynamoDBLocal_lib -jar bin/dynamodb_local_latest/DynamoDBLocal.jar -sharedDb -dbPath var/
 beanstalkd: beanstalkd
 beanstalkd_polls: beanstalkd -l 127.0.0.1 -p 11400
